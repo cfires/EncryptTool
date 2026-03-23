@@ -1,0 +1,67 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:EncryptTool.ViewModels"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		x:Class="EncryptTool.Views.MainWindow"
+		x:DataType="vm:MainWindowViewModel"
+		Icon="/Assets/logo.png"
+		Title="加解密工具"
+		Width="1000" Height="700"
+		WindowStartupLocation="CenterScreen">
+	<!--
+	<Grid ColumnDefinitions="210,*">
+	--><!-- 左侧菜单 --><!--
+	<DockPanel Background="#F8F9FA" Grid.Column="0">
+	<StackPanel Margin="20">
+	<TextBlock Text="加密工具" FontFamily="Microsoft YaHei, SimSun, sans-serif" FontSize="18" FontWeight="Bold" Margin="0 0 20 0"/>
+	<Button Content="AES加密" FontFamily="Microsoft YaHei, SimSun, sans-serif" Click="GoAes" Margin="0 5" Height="38"/>
+	<Button Content="DES加密" FontFamily="Microsoft YaHei, SimSun, sans-serif" Click="GoDes" Margin="0 5" Height="38"/>
+	<Button Content="Base64"  FontFamily="Microsoft YaHei, SimSun, sans-serif" Click="GoBase64" Margin="0 5" Height="38"/>
+	<Button Content="国密SM4" FontFamily="Microsoft YaHei, SimSun, sans-serif" Click="GoSm4" Margin="0 5" Height="38"/>
+	</StackPanel>
+	</DockPanel>
+
+	--><!-- 内容区域 --><!--
+	<ContentControl x:Name="ContentArea" Grid.Column="1" Margin="25"/>
+	</Grid>-->
+
+	<Grid Background="{DynamicResource PrimaryBackground}" ColumnDefinitions="150,*">
+		<Border Padding="20" Background="{DynamicResource PrimaryBackgroundGradient}">
+			<Grid RowDefinitions="*,Auto">
+				<StackPanel Spacing="12">
+					<TextBlock Text="加密工具" FontFamily="Microsoft YaHei, SimSun, sans-serif" Background="White" FontSize="18" FontWeight="Bold" Margin="0 0 20 0"/>
+					<!--			<Button HorizontalAlignment="Stretch">
+					<StackPanel Orientation="Horizontal">
+					<Label Classes="icon" Content="&#xe2c2;"></Label>
+					<Label Content="Home"></Label>
+					</StackPanel>
+					</Button>-->
+					<Button HorizontalAlignment="Stretch" Click="GoAes">
+						<StackPanel Orientation="Horizontal">
+							<Label Classes="icon" Content="&#xe2fe;"></Label>
+							<Label Content="AES"></Label>
+						</StackPanel>
+					</Button>
+					<!--			<Button HorizontalAlignment="Stretch" Click="GoDes">
+					<StackPanel Orientation="Horizontal">
+					<Label Classes="icon" Content="&#xe4e0;"></Label>
+					<Label Content="DES"></Label>
+					</StackPanel>
+					</Button>-->
+					<Button HorizontalAlignment="Stretch" Click="GoSm4">
+						<StackPanel Orientation="Horizontal">
+							<Label Classes="icon" Content="&#xe40c;"></Label>
+							<Label Content="SM4"></Label>
+						</StackPanel>
+					</Button>
+				</StackPanel>
+				<!--			<Button Classes="transparent" Grid.Row="1" >
+				<Label Classes="icon" Content="&#xe270;"></Label>
+				</Button>-->
+			</Grid>
+		</Border>
+		<ContentControl x:Name="ContentArea" Background="White" Grid.Column="1" Margin="25"/>
+	</Grid>
+</Window>

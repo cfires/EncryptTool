@@ -1,0 +1,56 @@
+# .NET
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# NuGet 包
+**/packages/
+**/node_modules/
+*.nuget.props
+*.nuget.targets
+
+# 编译输出
+*.dll
+*.exe
+*.pdb
+*.dbml
+*.cache
+*.resources
+*.log
+*.tmp
+
+# 发布目录
+**/Publish/
+**/Release/
+**/Debug/
+
+# ===================================
+# IDE / 编辑器缓存
+# ===================================
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.ide/
+
+# Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+*.code-workspace
+.history/
+
+# 本地配置
+*.local
+*.userprefs
+
+# 证书 / 密钥
+*.pfx
+*.snk
+*.publishsettings
+.env

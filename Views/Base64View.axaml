@@ -1,0 +1,19 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="EncryptTool.Base64View">
+  <StackPanel>
+        <TextBlock Text="Base64" FontSize="17" FontWeight="Bold"/>
+
+        <TextBox x:Name="TxtInput" Watermark="输入字符串" Margin="0 12" Height="120" AcceptsReturn="True"/>
+        
+        <StackPanel Orientation="Horizontal" Margin="0 12" Spacing="12">
+            <Button Content="编码" Click="Encode" Width="110"/>
+            <Button Content="解码" Click="Decode" Width="110"/>
+        </StackPanel>
+
+        <TextBox x:Name="TxtOutput" Watermark="输出结果" Height="140" AcceptsReturn="True"/>
+    </StackPanel>
+</UserControl>

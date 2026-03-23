@@ -1,0 +1,114 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:EncryptTool.ViewModels"
+			 mc:Ignorable="d"
+			 d:DesignWidth="800"
+			 d:DesignHeight="450"
+			 x:Class="EncryptTool.AesView"
+			 x:DataType="vm:AesViewModel">
+	<StackPanel>
+		<TextBlock Text="AES"
+				   FontFamily="Microsoft YaHei, SimSun, sans-serif"
+				   FontSize="17"
+				   FontWeight="Bold"/>
+
+		<StackPanel Orientation="Horizontal"
+					VerticalAlignment="Center"
+					Spacing="10"
+					Margin="0 5">
+			<TextBox
+			x:Name="TxtKey"
+			Watermark="请输入密钥（16/24/32位）"
+			Height="40"
+			Width="500"
+			Text="{Binding Key, Mode=TwoWay}"/>
+
+			<TextBlock
+			x:Name="TxtKeyLength"
+			Text="{Binding KeyLength, StringFormat='长度：{0}'}"
+			VerticalAlignment="Center"
+			MinWidth="60"/>
+		</StackPanel>
+
+		<CheckBox
+		Content="OpenSSL兼容模式"
+		FontFamily="Microsoft YaHei"
+		Margin="0 5"
+		IsChecked="{Binding IsOpenSslMode, Mode=TwoWay}" />
+		<StackPanel Orientation="Horizontal"
+					Spacing="15"
+					Margin="0 10">
+			<StackPanel Width="180">
+				<TextBlock Text="加密模式" Margin="0 0 0 3"/>
+				<ComboBox
+				Height="38"
+				Width="140"
+				IsEnabled="{Binding IsCustomModeEnabled}"
+				SelectedItem="{Binding SelectedMode}">
+					<ComboBox.Items>
+						<x:String>CBC</x:String>
+						<x:String>ECB</x:String>
+					</ComboBox.Items>
+				</ComboBox>
+			</StackPanel>
+
+			<StackPanel Width="180">
+				<TextBlock Text="填充模式" Margin="0 0 0 3"/>
+				<ComboBox
+				Height="38"
+				Width="140"
+				IsEnabled="{Binding IsCustomModeEnabled}"
+				SelectedItem="{Binding SelectedPadding}">
+					<ComboBox.Items>
+						<x:String>PKCS7</x:String>
+						<x:String>ZeroPadding</x:String>
+					</ComboBox.Items>
+				</ComboBox>
+			</StackPanel>
+
+			<StackPanel Width="180">
+				<TextBlock Text="字符集" Margin="0 0 0 3"/>
+				<ComboBox
+				Height="38"
+				Width="140"
+				IsEnabled="{Binding IsCustomModeEnabled}"
+				SelectedItem="{Binding SelectedCharset}">
+					<ComboBox.Items>
+						<x:String>UTF-8</x:String>
+						<x:String>GB2312</x:String>
+					</ComboBox.Items>
+				</ComboBox>
+			</StackPanel>
+		</StackPanel>
+
+		<TextBox
+		Watermark="输入需要加密的字符串"
+		Height="120"
+		AcceptsReturn="True"
+		Text="{Binding Input, Mode=TwoWay}"
+		FontFamily="Microsoft YaHei, SimSun, sans-serif"/>
+
+		<StackPanel Orientation="Horizontal"
+					Margin="0 12"
+					Spacing="12">
+			<Button
+			Content="加密"
+			Command="{Binding EncryptCommand}"
+			FontFamily="Microsoft YaHei, SimSun, sans-serif"
+			Width="110"/>
+			<Button
+			Content="解密"
+			Command="{Binding DecryptCommand}"
+			FontFamily="Microsoft YaHei, SimSun, sans-serif"
+			Width="110"/>
+		</StackPanel>
+
+		<TextBox
+		Watermark="输出结果"
+		Height="140"
+		AcceptsReturn="True"
+		Text="{Binding Output, Mode=OneWay}"/>
+	</StackPanel>
+</UserControl>
