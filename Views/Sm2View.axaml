@@ -1,0 +1,112 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:EncryptTool.ViewModels"
+			 mc:Ignorable="d"
+			 d:DesignWidth="800"
+			 d:DesignHeight="620"
+			 x:Class="EncryptTool.Sm2View"
+			 x:DataType="vm:Sm2ViewModel">
+	<ScrollViewer VerticalScrollBarVisibility="Auto">
+		<StackPanel Spacing="8">
+			<Grid ColumnDefinitions="*,Auto">
+				<TextBlock Text="SM2" FontSize="17" FontWeight="Bold" VerticalAlignment="Center"/>
+				<Button Grid.Column="1"
+						Content="生成密钥对"
+						Command="{Binding GenerateKeyPairCommand}"
+						Width="120"/>
+			</Grid>
+
+			<TextBlock Text="公钥（HEX）"/>
+			<Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+				<TextBox Watermark="130位未压缩公钥（04开头）或66位压缩公钥（02/03开头）"
+						 Height="40"
+						 Text="{Binding PublicKey, Mode=TwoWay}"/>
+				<Grid Grid.Column="1" ColumnDefinitions="Auto,Auto" VerticalAlignment="Center" MinWidth="80">
+					<TextBlock Text="长度:" FontSize="14" LineHeight="20" VerticalAlignment="Center"/>
+					<TextBlock Grid.Column="1"
+							   Text="{Binding PublicKeyLength}"
+							   FontSize="14"
+							   LineHeight="20"
+							   VerticalAlignment="Center"
+							   MinWidth="32"/>
+				</Grid>
+			</Grid>
+
+			<TextBlock Text="私钥（HEX）"/>
+			<Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+				<TextBox Watermark="64位HEX格式私钥"
+						 Height="40"
+						 Text="{Binding PrivateKey, Mode=TwoWay}"/>
+				<Grid Grid.Column="1" ColumnDefinitions="Auto,Auto" VerticalAlignment="Center" MinWidth="80">
+					<TextBlock Text="长度:" FontSize="14" LineHeight="20" VerticalAlignment="Center"/>
+					<TextBlock Grid.Column="1"
+							   Text="{Binding PrivateKeyLength}"
+							   FontSize="14"
+							   LineHeight="20"
+							   VerticalAlignment="Center"
+							   MinWidth="32"/>
+				</Grid>
+			</Grid>
+
+			<StackPanel Orientation="Horizontal" Spacing="20" Margin="0 4">
+				<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="6">
+					<TextBlock Text="密文排列" VerticalAlignment="Center"/>
+					<ComboBox Width="120"
+							  Height="34"
+							  SelectedItem="{Binding SelectedCipherMode}">
+						<ComboBox.Items>
+							<x:String>C1C3C2</x:String>
+							<x:String>C1C2C3</x:String>
+						</ComboBox.Items>
+					</ComboBox>
+				</StackPanel>
+
+				<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="6">
+					<TextBlock Text="字符集" VerticalAlignment="Center"/>
+					<ComboBox Width="110"
+							  Height="34"
+							  SelectedItem="{Binding SelectedCharset}">
+						<ComboBox.Items>
+							<x:String>UTF-8</x:String>
+							<x:String>GB2312</x:String>
+						</ComboBox.Items>
+					</ComboBox>
+				</StackPanel>
+
+				<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="6">
+					<TextBlock Text="密文格式" VerticalAlignment="Center"/>
+					<ComboBox Width="110"
+							  Height="34"
+							  SelectedItem="{Binding SelectedOutputFormat}">
+						<ComboBox.Items>
+							<x:String>Base64</x:String>
+							<x:String>HEX</x:String>
+						</ComboBox.Items>
+					</ComboBox>
+				</StackPanel>
+			</StackPanel>
+
+			<TextBox Watermark="加密时输入明文；解密时输入密文"
+					 Height="105"
+					 AcceptsReturn="True"
+					 Text="{Binding Input, Mode=TwoWay}"/>
+
+			<StackPanel Orientation="Horizontal" Spacing="12" Margin="0 4">
+				<Button Content="公钥加密"
+						Command="{Binding EncryptCommand}"
+						Width="120"/>
+				<Button Content="私钥解密"
+						Command="{Binding DecryptCommand}"
+						Width="120"/>
+			</StackPanel>
+
+			<TextBox Watermark="输出结果"
+					 Height="120"
+					 AcceptsReturn="True"
+					 IsReadOnly="True"
+					 Text="{Binding Output, Mode=OneWay}"/>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

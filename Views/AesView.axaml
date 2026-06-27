@@ -25,11 +25,22 @@
 			Width="500"
 			Text="{Binding Key, Mode=TwoWay}"/>
 
-			<TextBlock
-			x:Name="TxtKeyLength"
-			Text="{Binding KeyLength, StringFormat='长度：{0}'}"
-			VerticalAlignment="Center"
-			MinWidth="60"/>
+			<Grid ColumnDefinitions="Auto,Auto"
+				  VerticalAlignment="Center"
+				  MinWidth="72">
+				<TextBlock Text="长度:"
+						   FontSize="14"
+						   LineHeight="20"
+						   VerticalAlignment="Center"/>
+				<TextBlock
+				x:Name="TxtKeyLength"
+				Grid.Column="1"
+				Text="{Binding KeyLength}"
+				FontSize="14"
+				LineHeight="20"
+				VerticalAlignment="Center"
+				MinWidth="24"/>
+			</Grid>
 		</StackPanel>
 
 		<CheckBox

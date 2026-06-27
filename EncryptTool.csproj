@@ -3,6 +3,11 @@
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
+		<Version>1.0.0</Version>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<FileVersion>1.0.0.0</FileVersion>
+		<InformationalVersion>$(Version)</InformationalVersion>
+		<UpdateManifestUrl></UpdateManifestUrl>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
@@ -12,6 +17,13 @@
 	<ItemGroup>
 		<Folder Include="Models\" />
 		<AvaloniaResource Include="Assets\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+			<_Parameter1>UpdateManifestUrl</_Parameter1>
+			<_Parameter2>$(UpdateManifestUrl)</_Parameter2>
+		</AssemblyAttribute>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -27,5 +39,6 @@
 		</PackageReference>
 		<PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
 	</ItemGroup>
 </Project>

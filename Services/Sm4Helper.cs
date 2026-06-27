@@ -88,9 +88,7 @@ namespace EncryptTool.Services
                 cipher.Init(false, new KeyParameter(keyBytes));
             }
 
-            byte[] dataBytes = inputFormat == "Base64"
-                ? Convert.FromBase64String(data)
-                : Convert.FromHexString(data);
+            byte[] dataBytes = ParseCipherText(data, inputFormat);
 
             byte[] decrypted = cipher.DoFinal(dataBytes);
             return enc.GetString(decrypted);
@@ -101,15 +99,46 @@ namespace EncryptTool.Services
         /// </summary>
         private static byte[] HexStringToBytes(string hex)
         {
-            if (hex.Length != 32)
+            if (!IsHexString(hex, 32))
                 throw new ArgumentException("SM4 密钥/IV必须是32位十六进制字符串");
 
-            byte[] bytes = new byte[16];
-            for (int i = 0; i < 16; i++)
+            return Convert.FromHexString(hex);
+        }
+
+        public static bool IsHexString(string? value, int requiredLength)
+        {
+            if (string.IsNullOrWhiteSpace(value) || value.Length != requiredLength)
+                return false;
+
+            foreach (char c in value)
             {
-                bytes[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
+                bool isHex =
+                    c is >= '0' and <= '9' ||
+                    c is >= 'a' and <= 'f' ||
+                    c is >= 'A' and <= 'F';
+
+                if (!isHex)
+                    return false;
             }
-            return bytes;
+
+            return true;
+        }
+
+        private static byte[] ParseCipherText(string data, string inputFormat)
+        {
+            if (string.IsNullOrWhiteSpace(data))
+                throw new ArgumentException("请输入需要解密的内容");
+
+            try
+            {
+                return inputFormat == "Base64"
+                    ? Convert.FromBase64String(data)
+                    : Convert.FromHexString(data);
+            }
+            catch (FormatException ex)
+            {
+                throw new ArgumentException($"密文不是有效的{inputFormat}格式", ex);
+            }
         }
     }
 }

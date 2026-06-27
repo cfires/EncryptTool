@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
@@ -13,6 +14,7 @@ namespace EncryptTool
     {
         public override void Initialize()
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             AvaloniaXamlLoader.Load(this);
         }
 

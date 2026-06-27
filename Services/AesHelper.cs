@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EncryptTool.Services
 {
     public static class AesHelper
     {
+        private static readonly byte[] OpenSslPrefix = Encoding.ASCII.GetBytes("Salted__");
+
         /// <summary>
-        /// AES 加密（自动支持 16/24/32 位密钥）& (支持模式/填充/编码)
+        /// AES 加密，支持 CBC/ECB、PKCS7/ZeroPadding 和不同字符集。
         /// </summary>
         public static string Encrypt(
             string data,
@@ -21,43 +19,17 @@ namespace EncryptTool.Services
             string padding = "PKCS7",
             string charset = "UTF-8")
         {
-            using var aes = Aes.Create();
+            Encoding enc = GetEncoding(charset);
+            using var aes = CreateAes(key, mode, padding, enc);
 
-            // 1. 设置模式
-            aes.Mode = mode == "ECB" ? CipherMode.ECB : CipherMode.CBC;
-
-            // 2. 设置填充
-            aes.Padding = padding == "ZeroPadding"
-                ? PaddingMode.Zeros
-                : PaddingMode.PKCS7;
-
-            // 3. 获取编码
-            Encoding enc = Encoding.GetEncoding(charset);
-
-            // 4. 密钥
-            byte[] keyBytes = enc.GetBytes(key);
-            if (keyBytes.Length is not 16 and not 24 and not 32)
-                throw new ArgumentException($"密钥必须是16/24/32位，当前：{keyBytes.Length}");
-
-            aes.Key = keyBytes;
-
-            // 5. IV（ECB 模式不用）
-            if (aes.Mode == CipherMode.CBC)
-            {
-                byte[] ivBytes = new byte[16];
-                Array.Copy(keyBytes, ivBytes, Math.Min(keyBytes.Length, 16));
-                aes.IV = ivBytes;
-            }
-
-            // 6. 加密
+            byte[] dataBytes = enc.GetBytes(data ?? string.Empty);
             using var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
-            byte[] dataBytes = enc.GetBytes(data);
             byte[] encrypted = encryptor.TransformFinalBlock(dataBytes, 0, dataBytes.Length);
             return Convert.ToBase64String(encrypted);
         }
 
         /// <summary>
-        /// AES 解密
+        /// AES 解密。
         /// </summary>
         public static string Decrypt(
             string data,
@@ -66,43 +38,25 @@ namespace EncryptTool.Services
             string padding = "PKCS7",
             string charset = "UTF-8")
         {
-            using var aes = Aes.Create();
-            aes.Mode = mode == "ECB" ? CipherMode.ECB : CipherMode.CBC;
-            aes.Padding = padding == "ZeroPadding"
-                ? PaddingMode.Zeros
-                : PaddingMode.PKCS7;
+            if (string.IsNullOrWhiteSpace(data))
+                throw new ArgumentException("请输入需要解密的Base64内容");
 
-            Encoding enc = Encoding.GetEncoding(charset);
-            byte[] keyBytes = enc.GetBytes(key);
-            aes.Key = keyBytes;
+            Encoding enc = GetEncoding(charset);
+            using var aes = CreateAes(key, mode, padding, enc);
 
-            if (aes.Mode == CipherMode.CBC)
-            {
-                byte[] ivBytes = new byte[16];
-                Array.Copy(keyBytes, ivBytes, Math.Min(keyBytes.Length, 16));
-                aes.IV = ivBytes;
-            }
-
-            using var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
             byte[] bytes = Convert.FromBase64String(data);
+            using var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
             byte[] decrypted = decryptor.TransformFinalBlock(bytes, 0, bytes.Length);
 
             string result = enc.GetString(decrypted);
-
-            // 零填充需要去掉末尾 \0
-            if (aes.Padding == PaddingMode.Zeros)
-                result = result.TrimEnd('\0');
-
-            return result;
+            return aes.Padding == PaddingMode.Zeros ? result.TrimEnd('\0') : result;
         }
 
         #region OpenSSL 兼容模式
-        private static readonly byte[] OpenSslPrefix = Encoding.ASCII.GetBytes("Salted__");
-
         public static string EncryptOpenSsl(string data, string key, string charset = "UTF-8")
         {
-            Encoding enc = Encoding.GetEncoding(charset);
-            byte[] passwordBytes = Encoding.ASCII.GetBytes(key);
+            Encoding enc = GetEncoding(charset);
+            byte[] passwordBytes = Encoding.ASCII.GetBytes(key ?? string.Empty);
             byte[] salt = new byte[8];
             RandomNumberGenerator.Fill(salt);
 
@@ -119,7 +73,7 @@ namespace EncryptTool.Services
             ms.Write(salt, 0, salt.Length);
 
             using var cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write);
-            byte[] dataBytes = enc.GetBytes(data);
+            byte[] dataBytes = enc.GetBytes(data ?? string.Empty);
             cs.Write(dataBytes, 0, dataBytes.Length);
             cs.FlushFinalBlock();
 
@@ -128,20 +82,23 @@ namespace EncryptTool.Services
 
         public static string DecryptOpenSsl(string base64Data, string key, string charset = "UTF-8")
         {
-            Encoding enc = Encoding.GetEncoding(charset);
+            if (string.IsNullOrWhiteSpace(base64Data))
+                throw new ArgumentException("请输入需要解密的OpenSSL密文");
+
+            Encoding enc = GetEncoding(charset);
             byte[] allBytes = Convert.FromBase64String(base64Data);
 
             if (allBytes.Length < 16)
                 throw new InvalidOperationException("无效的OpenSSL格式密文");
 
             byte[] prefix = allBytes.AsSpan(0, 8).ToArray();
-            if (!CompareBytes(prefix, OpenSslPrefix))
+            if (!CryptographicOperations.FixedTimeEquals(prefix, OpenSslPrefix))
                 throw new InvalidOperationException("密文格式不正确，非Salted__开头");
 
             byte[] salt = allBytes.AsSpan(8, 8).ToArray();
             byte[] cipherBytes = allBytes.AsSpan(16).ToArray();
 
-            DeriveKeyAndIv(Encoding.ASCII.GetBytes(key), salt, out byte[] aesKey, out byte[] iv);
+            DeriveKeyAndIv(Encoding.ASCII.GetBytes(key ?? string.Empty), salt, out byte[] aesKey, out byte[] iv);
 
             using var aes = Aes.Create();
             aes.Key = aesKey;
@@ -165,34 +122,64 @@ namespace EncryptTool.Services
 
             byte[] data = Array.Empty<byte>();
             int total = 0;
+            int targetLength = key.Length + iv.Length;
+            byte[] keyAndIv = new byte[targetLength];
 
-            while (total < key.Length + iv.Length)
+            while (total < targetLength)
             {
-                byte[] temp = Combine(data, password, salt);
-                data = md5.ComputeHash(temp);
-
-                int copy = Math.Min(data.Length, key.Length + iv.Length - total);
-                Buffer.BlockCopy(data, 0, total < key.Length ? key : iv,
-                                total < key.Length ? total : total - key.Length, copy);
+                data = md5.ComputeHash(Combine(data, password, salt));
+                int copy = Math.Min(data.Length, targetLength - total);
+                Buffer.BlockCopy(data, 0, keyAndIv, total, copy);
                 total += copy;
+            }
+
+            Buffer.BlockCopy(keyAndIv, 0, key, 0, key.Length);
+            Buffer.BlockCopy(keyAndIv, key.Length, iv, 0, iv.Length);
+        }
+        #endregion
+
+        private static Aes CreateAes(string key, string mode, string padding, Encoding enc)
+        {
+            byte[] keyBytes = enc.GetBytes(key ?? string.Empty);
+            if (keyBytes.Length is not 16 and not 24 and not 32)
+                throw new ArgumentException($"AES密钥必须是16/24/32字节，当前：{keyBytes.Length}");
+
+            var aes = Aes.Create();
+            aes.Mode = mode == "ECB" ? CipherMode.ECB : CipherMode.CBC;
+            aes.Padding = padding == "ZeroPadding" ? PaddingMode.Zeros : PaddingMode.PKCS7;
+            aes.Key = keyBytes;
+
+            if (aes.Mode == CipherMode.CBC)
+            {
+                byte[] ivBytes = new byte[16];
+                Array.Copy(keyBytes, ivBytes, Math.Min(keyBytes.Length, ivBytes.Length));
+                aes.IV = ivBytes;
+            }
+
+            return aes;
+        }
+
+        private static Encoding GetEncoding(string charset)
+        {
+            try
+            {
+                return Encoding.GetEncoding(charset);
+            }
+            catch (Exception ex) when (ex is ArgumentException or NotSupportedException)
+            {
+                throw new ArgumentException($"不支持的字符集：{charset}", ex);
             }
         }
 
         private static byte[] Combine(params byte[][] arrays)
         {
             using var ms = new MemoryStream();
-            foreach (var a in arrays) ms.Write(a, 0, a.Length);
+            foreach (var array in arrays)
+            {
+                ms.Write(array, 0, array.Length);
+            }
+
             return ms.ToArray();
         }
-
-        private static bool CompareBytes(byte[] a, byte[] b)
-        {
-            if (a.Length != b.Length) return false;
-            for (int i = 0; i < a.Length; i++)
-                if (a[i] != b[i]) return false;
-            return true;
-        }
-        #endregion
     }
-
 }
